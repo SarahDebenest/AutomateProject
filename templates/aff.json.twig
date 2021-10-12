@@ -1,0 +1,11 @@
+{
+    "liste": [
+        {% for patient in liste %}
+        {
+            "nom": "{{patient.idPatient  }}",
+            "id" : "{{patient.nomPatient  }}"
+        }
+        {% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+}

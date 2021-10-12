@@ -1,0 +1,12 @@
+{
+    "liste": [
+        {% for analyse in liste %}
+        {
+            "id": "{{ analyse.idAnalyse }}",
+            "type": "{{ analyse.typeAnalyse }}",
+            "result": "{{ analyse.result }}"
+        }
+        {% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+}
