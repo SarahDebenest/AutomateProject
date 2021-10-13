@@ -54,12 +54,12 @@ class Controller extends AbstractController
     #[Route(path: "/patientAnalyses/{id}", methods: ['GET'])]
     public function analysesPatient(EntityManagerInterface $em, int $id)
     {
-        $pat = $em->getRepository(Patient::class)->find($id);
-        if($pat!=NULL){
-            $ana = $em->getRepository(Analyse::class)->findBy(['patient'=> $id]);
-            if ($ana!=NULL) {
-                foreach ($ana as $a) {
-                    return $this->render('analysesPatient.json.twig', ['patient'=> $id, 'analyse' => $a]);
+        $patient = $em->getRepository(Patient::class)->find($id);
+        if($patient!=NULL){
+            $analyses = $em->getRepository(Analyse::class)->findBy(['patient'=> $id]);
+            if ($analyses!=NULL) {
+                foreach ($analyses as $analyse) {
+                    return $this->render('analysesPatient.json.twig', ['patient'=> $id, 'analyses' => $analyses]);
                 }
             } else {
                 return new Response("Pas d'analyses pour ce patient");

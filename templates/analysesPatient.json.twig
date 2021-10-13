@@ -1,6 +1,13 @@
 {
-    "nomPatient": "{{ analyse.patient.nomPatient }}",
-    "id": "{{ analyse.idAnalyse }}",
-    "type": "{{ analyse.typeAnalyse }}",
-    "result": "{{ analyse.result }}"
+    "analyse": [
+        {% for analyse in analyses %}
+        {
+            "nomPatient": "{{ analyse.patient.nomPatient }}",
+            "id": "{{ analyse.idAnalyse }}",
+            "type": "{{ analyse.typeAnalyse }}",
+            "result": "{{ analyse.result }}"
+        }
+        {% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
 }
