@@ -21,7 +21,11 @@ class Controller extends AbstractController
     public function affichageListePatients(EntityManagerInterface $em)
     {
         $listepatients= $em->getRepository(Patient::class)->findAll();
+        if($listepatients!=NULL){
         return $this->render('listePatients.json.twig', ['liste'=> $listepatients]);
+        }else{
+            return new Response("Pas de patients dans la base");
+        }
     }
 
     /**
@@ -34,7 +38,11 @@ class Controller extends AbstractController
     public function affichageInformationsUnPatient(EntityManagerInterface $em, int $id)
     {
         $patient = $em->getRepository(Patient::class)->find($id);
-        return $this->render('informationsUnPatient.json.twig', ['patient' => $patient]);
+        if($patient!=NULL) {
+            return $this->render('informationsUnPatient.json.twig', ['patient' => $patient]);
+        }else{
+            return new Response("Pas de patient avec cet identifiant");
+        }
     }
 
     /**
@@ -99,12 +107,15 @@ class Controller extends AbstractController
     public function modificationPatient(Request $request, EntityManagerInterface $em, int $id)
     {
         $data = json_decode($request->getContent()); //retrieval of changed information in the postman
-
         $patient = $em->getRepository(Patient::class)->find($id);
 
-        $patient->nomPatient = $data->nom; //Change informations on the database
-        $em->flush();
-        return $this->render('informationsUnPatient.json.twig', ['patient' => $patient]);
+        if($patient!=NULL) {
+            $patient->nomPatient = $data->nom;
+            $em->flush();
+            return $this->render('informationsUnPatient.json.twig', ['patient' => $patient]);
+        }else{
+            return new Response("Pas de patient pour cet identifiant, vous ne pouvez pas modifier un patient qui n'existe pas !");
+        }
     }
 
     /**
@@ -118,12 +129,22 @@ class Controller extends AbstractController
     public function modificationAnalyse(Request $request, EntityManagerInterface $em, int $id)
     {
         $data = json_decode($request->getContent()); //retrieval of changed information in the postman
-
         $analyse = $em->getRepository(Analyse::class)->find($id);
-
-        $analyse->result = $data->result; //Change informations on the database
-        $em->flush();
-        return $this->render('analyseresult.json.twig', ['analyse' => $analyse]);
+        if($analyse!=NULL) {
+            $analyse->typeAnalyse = $data->type;
+            $analyse->result = $data->result;
+            $idPat = $data->idPatient;
+            $patient = $em->getRepository(Patient::class)->find($idPat);
+            if($patient!=NULL) {
+                $analyse->patient = $patient;
+                $em->flush();
+                return $this->render('creationAnalyse.json.twig', ['analyse' => $analyse]);
+            }else{
+                return new Response("Pas de patient avec cet identifiant");
+            }
+        }else{
+            return new Response("Pas d'analyse avec cet identifiant");
+        }
     }
 
     /**
@@ -135,7 +156,11 @@ class Controller extends AbstractController
     public function listeAnalyses(EntityManagerInterface $em)
     {
         $liste= $em->getRepository(Analyse::class)->findAll();
-        return $this->render('analyses.json.twig', ['liste'=> $liste]);
+        if($liste!=NULL) {
+            return $this->render('analyses.json.twig', ['liste' => $liste]);
+        }else{
+            return new Response("Pas d'analyses dans la table");
+        }
     }
 
     /**
@@ -148,7 +173,11 @@ class Controller extends AbstractController
     public function affichageUneAnalyse(EntityManagerInterface $em, int $id)
     {
         $analyse = $em->getRepository(Analyse::class)->find($id);
-        return $this->render('analyseresult.json.twig', ['analyse' => $analyse]);
+        if($analyse!=NULL) {
+            return $this->render('analyseresult.json.twig', ['analyse' => $analyse]);
+        }else{
+            return new Response("Pas d'analyse avec cet identifiant");
+        }
     }
 
     /**
@@ -161,9 +190,13 @@ class Controller extends AbstractController
     public function suppressionAnalyse(EntityManagerInterface $em, int $id)
     {
         $analyse = $em->getRepository(Analyse::class)->find($id);
-        $em->remove($analyse);
-        $em->flush();
-        return new Response('Analyse supprimée');
+        if($analyse!=NULL) {
+            $em->remove($analyse);
+            $em->flush();
+            return new Response('Analyse supprimée');
+        }else{
+            return new Response('Analyse introuvable');
+        }
     }
 
     /**
@@ -180,10 +213,14 @@ class Controller extends AbstractController
         $result=$data->result;
         $idPat=$data->idPatient;
         $patient = $em->getRepository(Patient::class)->find($idPat);
-        $analyse = new Analyse($type, $result, $patient);
-        $em->persist($analyse);
-        $em->flush();
-        return $this->render('creationAnalyse.json.twig', ['analyse' => $analyse]);
+        if($patient!=NULL) {
+            $analyse = new Analyse($type, $result, $patient);
+            $em->persist($analyse);
+            $em->flush();
+            return $this->render('creationAnalyse.json.twig', ['analyse' => $analyse]);
+        }else{
+            return new Response('Pas de patient avec cet identifiant');
+        }
     }
 
     #[Route(path: "/creationPatient", methods: ['POST'])]
