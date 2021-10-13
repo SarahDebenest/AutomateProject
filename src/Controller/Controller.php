@@ -17,10 +17,10 @@ class Controller extends AbstractController
      * This function display the list of patients on json format
      */
     #[Route(path: "/patients")]
-    public function premiereRoute(EntityManagerInterface $em)
+    public function affichageListePatients(EntityManagerInterface $em)
     {
-        $liste= $em->getRepository(Patient::class)->findAll();
-        return $this->render('aff.json.twig', ['liste'=> $liste]);
+        $listepatients= $em->getRepository(Patient::class)->findAll();
+        return $this->render('listePatients.json.twig', ['liste'=> $listepatients]);
     }
 
     /**
@@ -30,22 +30,27 @@ class Controller extends AbstractController
      * This function display the patient's information by his id
      */
     #[Route(path: "/patient/{id}", methods: ['GET'])]
-    public function secondeRoute(EntityManagerInterface $em, int $id)
+    public function affichageInformationsUnPatient(EntityManagerInterface $em, int $id)
     {
-        $pat = $em->getRepository(Patient::class)->find($id);
-        return $this->render('affichage.json.twig', ['patient' => $pat]);
-        return new Response('Voici les informations du patient : ', $id);
+        $patient = $em->getRepository(Patient::class)->find($id);
+        return $this->render('informationsUnPatient.json.twig', ['patient' => $patient]);
     }
 
+    /**
+     * @param EntityManagerInterface $em
+     * @param int $id
+     * @return Response|void
+     * This function display analyses of a patient
+     */
     #[Route(path: "/patientAnalyses/{id}", methods: ['GET'])]
-    public function patientAnalyses(EntityManagerInterface $em, int $id)
+    public function analysesPatient(EntityManagerInterface $em, int $id)
     {
         $pat = $em->getRepository(Patient::class)->find($id);
         if($pat!=NULL){
             $ana = $em->getRepository(Analyse::class)->findBy(['patient'=> $id]);
             if ($ana!=NULL) {
                 foreach ($ana as $a) {
-                    return $this->render('analyseresult.json.twig', ['analyse' => $a]);
+                    return $this->render('analysesPatient.json.twig', ['patient'=> $id, 'analyse' => $a]);
                 }
             } else {
                 return new Response("Pas d'analyses pour ce patient");
@@ -62,18 +67,18 @@ class Controller extends AbstractController
      * This function delete a patient and his analyses from the database with json
      */
     #[Route(path: "/patient/{id}", methods: ['DELETE'])]
-    public function troisiemeRoute(EntityManagerInterface $em, int $id)
+    public function suppressionPatient(EntityManagerInterface $em, int $id)
     {
-        $pat = $em->getRepository(Patient::class)->find($id);
-        if($pat!=NULL){
-            $ana = $em->getRepository(Analyse::class)->findBy(['patient'=> $id]);
-            if ($ana!=NULL) {
-                foreach ($ana as $a) {
-                    $em->remove($a);
+        $patient = $em->getRepository(Patient::class)->find($id);
+        if($patient!=NULL){
+            $analyses = $em->getRepository(Analyse::class)->findBy(['patient'=> $id]);
+            if ($analyses!=NULL) {
+                foreach ($analyses as $analyse) {
+                    $em->remove($analyse);
                 }
-                $em->remove($pat);
+                $em->remove($patient);
                 $em->flush();
-                return new Response('Patient et analyses supprimés');
+                return new Response('Patient et ses analyses supprimées');
             } else {
                 return new Response("Pas d'analyses pour ce patient");
             }
@@ -90,16 +95,15 @@ class Controller extends AbstractController
      * This function modify information of the patient
      */
     #[Route(path: "/patient/{id}", methods: ['PUT'])]
-    public function quatriemeRoute(Request $request, EntityManagerInterface $em, int $id)
+    public function modificationPatient(Request $request, EntityManagerInterface $em, int $id)
     {
         $data = json_decode($request->getContent()); //retrieval of changed information in the postman
 
-        $pat = $em->getRepository(Patient::class)->find($id);
+        $patient = $em->getRepository(Patient::class)->find($id);
 
-        $pat->nomPatient = $data->nom; //Change informations on the database
+        $patient->nomPatient = $data->nom; //Change informations on the database
         $em->flush();
-        return $this->render('affichage.json.twig', ['patient' => $pat]);
-
+        return $this->render('informationsUnPatient.json.twig', ['patient' => $patient]);
     }
 
     /**
@@ -110,16 +114,15 @@ class Controller extends AbstractController
      * This function allows to change the analyse result
      */
     #[Route(path: "/analyse/{id}", methods: ['PUT'])]
-    public function analyseChange(Request $request, EntityManagerInterface $em, int $id)
+    public function modificationAnalyse(Request $request, EntityManagerInterface $em, int $id)
     {
         $data = json_decode($request->getContent()); //retrieval of changed information in the postman
 
-        $ana = $em->getRepository(Analyse::class)->find($id);
+        $analyse = $em->getRepository(Analyse::class)->find($id);
 
-        $ana->result = $data->result; //Change informations on the database
+        $analyse->result = $data->result; //Change informations on the database
         $em->flush();
-        return $this->render('analyseresult.json.twig', ['analyse' => $ana]);
-
+        return $this->render('analyseresult.json.twig', ['analyse' => $analyse]);
     }
 
     /**
@@ -128,7 +131,7 @@ class Controller extends AbstractController
      * This function display the list of all analyses
      */
     #[Route(path: "/analyses")]
-    public function listAnalyse(EntityManagerInterface $em)
+    public function listeAnalyses(EntityManagerInterface $em)
     {
         $liste= $em->getRepository(Analyse::class)->findAll();
         return $this->render('analyses.json.twig', ['liste'=> $liste]);
@@ -141,10 +144,10 @@ class Controller extends AbstractController
      * This function displays the analyse informations with his id
      */
     #[Route(path: "/analyse/{id}", methods: ['GET'])]
-    public function affAnalyseid(EntityManagerInterface $em, int $id)
+    public function affichageUneAnalyse(EntityManagerInterface $em, int $id)
     {
-        $ana = $em->getRepository(Analyse::class)->find($id);
-        return $this->render('analyseresult.json.twig', ['analyse' => $ana]);
+        $analyse = $em->getRepository(Analyse::class)->find($id);
+        return $this->render('analyseresult.json.twig', ['analyse' => $analyse]);
     }
 
     /**
@@ -154,10 +157,10 @@ class Controller extends AbstractController
      * Delete an analyse according to his id
      */
     #[Route(path: "/analyse/{id}", methods: ['DELETE'])]
-    public function deleteAnalyseid(EntityManagerInterface $em, int $id)
+    public function suppressionAnalyse(EntityManagerInterface $em, int $id)
     {
-        $ana = $em->getRepository(Analyse::class)->find($id);
-        $em->remove($ana);
+        $analyse = $em->getRepository(Analyse::class)->find($id);
+        $em->remove($analyse);
         $em->flush();
         return new Response('Analyse supprimée');
     }
