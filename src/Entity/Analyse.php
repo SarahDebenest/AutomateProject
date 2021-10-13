@@ -16,22 +16,20 @@ class Analyse
 {
     /**
      * @var int
-     *
      * @ORM\Column(name="id_analyse", type="integer")
      * @ORM\Id()
+     * @ORM\GeneratedValue()
      */
     public int $idAnalyse;
 
     /**
      * @var string
-     *
      * @ORM\Column(name="type_analyse", type="string")
      */
     public string $typeAnalyse;
 
     /**
      * @var string
-     *
      * @ORM\Column(name="result", type="string")
      */
     public string $result;
@@ -43,11 +41,9 @@ class Analyse
      */
     public ?Patient $patient;
 
-    public function __construct(int $idAnalyse, string $typeAnalyse, string $result, ?Patient $patient=null){
-        $this->idAnalyse = $idAnalyse;
+    public function __construct(string $typeAnalyse, string $result, ?Patient $patient=null){
         $this->typeAnalyse = $typeAnalyse;
         $this->result = $result;
         $this->patient = $patient;
     }
-
 }

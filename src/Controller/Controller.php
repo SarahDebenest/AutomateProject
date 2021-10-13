@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Controller;
+
 use App\Entity\Analyse;
 use App\Entity\Patient;
 use Doctrine\ORM\EntityManagerInterface;
@@ -163,5 +164,19 @@ class Controller extends AbstractController
         $em->remove($analyse);
         $em->flush();
         return new Response('Analyse supprimée');
+    }
+
+    #[Route(path: "/creationAnalyse", methods: ['POST'])]
+    public function creationAnalyse(Request $request, EntityManagerInterface $em)
+    {
+        $data = json_decode($request->getContent());
+        $type = $data->type;
+        $result=$data->result;
+        $idPat=$data->idPatient;
+        $patient = $em->getRepository(Patient::class)->find($idPat);
+        $analyse = new Analyse($type, $result, $patient);
+        $em->persist($analyse);
+        $em->flush();
+        return $this->render('creationAnalyse.json.twig', ['analyse' => $analyse]);
     }
 }
