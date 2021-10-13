@@ -166,6 +166,12 @@ class Controller extends AbstractController
         return new Response('Analyse supprimée');
     }
 
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @return Response
+     * This function allows to create a new analysis for a patient
+     */
     #[Route(path: "/creationAnalyse", methods: ['POST'])]
     public function creationAnalyse(Request $request, EntityManagerInterface $em)
     {
@@ -178,5 +184,16 @@ class Controller extends AbstractController
         $em->persist($analyse);
         $em->flush();
         return $this->render('creationAnalyse.json.twig', ['analyse' => $analyse]);
+    }
+
+    #[Route(path: "/creationPatient", methods: ['POST'])]
+    public function creationPatient(Request $request, EntityManagerInterface $em)
+    {
+        $data = json_decode($request->getContent());
+        $nomPatient = $data->nomPatient;
+        $patient = new Patient($nomPatient);
+        $em->persist($patient);
+        $em->flush();
+        return $this->render('creationPatient.json.twig', ['patient' => $patient]);
     }
 }
