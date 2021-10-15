@@ -2,8 +2,8 @@
     "liste": [
         {% for patient in liste %}
         {
-            "nom": "{{patient.idPatient  }}",
-            "id" : "{{patient.nomPatient  }}"
+            "id": "{{patient.idPatient  }}",
+            "nom" : "{{patient.nomPatient  }}"
         }
         {% if not loop.last %},{% endif %}
         {% endfor %}

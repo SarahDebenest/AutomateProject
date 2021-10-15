@@ -110,9 +110,9 @@ class Controller extends AbstractController
         $patient = $em->getRepository(Patient::class)->find($id);
 
         if($patient!=NULL) {
-            $patient->nomPatient = $data->nom;
+            $patient->nomPatient = $data->nomPatient;
             $em->flush();
-            return $this->render('informationsUnPatient.json.twig', ['patient' => $patient]);
+            return $this->render('creationPatient.json.twig', ['patient' => $patient]);
         }else{
             return new Response("Pas de patient pour cet identifiant, vous ne pouvez pas modifier un patient qui n'existe pas !");
         }
